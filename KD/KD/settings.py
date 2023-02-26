@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'art',
     'rest_framework',
     'rest_framework.authtoken',
-    'corsheaders'
+    'corsheaders',
 ]
 
 MIDDLEWARE = [

@@ -19,6 +19,7 @@ class Picture(models.Model):
     comment = models.TextField(default="")
     artist_id = ArrayField(models.CharField(blank=True,max_length=300), default=list)
     match = models.IntegerField(default=0)
+    price =  models.IntegerField(default=0)
 
 
 
