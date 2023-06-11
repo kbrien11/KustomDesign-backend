@@ -1,5 +1,6 @@
 import email
 from hashlib import new
+import numbers
 from django.shortcuts import render
 from requests import request
 
@@ -26,6 +27,7 @@ def createUser(request):
     last_name = request.data["last_name"]
     username = request.data["username"]
     profile_image = request.data["profile_image"]
+    location = request.data["location"]
 
     pass_hash = make_password(request.data["password"])
     print(pass_hash)
@@ -37,6 +39,7 @@ def createUser(request):
         last_name=last_name,
         username=username,
         profile_image=profile_image,
+        location=location,
     )
     if new_user:
         new_user.save()
@@ -97,6 +100,16 @@ def upload_image(request, user_pk):
 @api_view(["GET"])
 def get_images(request):
     images = Picture.objects.filter(match=0).all()
+    picture_ser = PictureSerializer(images, many=True)
+    if picture_ser:
+        return Response({"images": picture_ser.data, "showDetails": True})
+    else:
+        return Response({"error": "invalid user"})
+
+
+@api_view(["GET"])
+def home_images(request):
+    images = Picture.objects.all()
     picture_ser = PictureSerializer(images, many=True)
     if picture_ser:
         return Response({"images": picture_ser.data, "showDetails": True})
@@ -167,9 +180,13 @@ def get_artists(request, artist_ids):
 @api_view(["GET"])
 def addMatch(request, artist, user, picture):
     image = Picture.objects.filter(id=picture).first()
+    artist_username = CustomUser.objects.filter(username=artist).first()
     if image:
         image.match = 1
-        image.save(update_fields=["match"])
+        image.artist_username = artist
+        artist_username.artist_picture_list.append(image.image)
+        artist_username.save(update_fields="artist_picture_list")
+        image.save(update_fields=["match", "artist_username"])
         new_match = MatchRelationship(user_pk=user, artist=artist, picture_pk=image)
         if new_match:
             new_match.save()
@@ -202,6 +219,21 @@ def imagePerArtist(request, artist_id, username):
             return Response({"images": picture_list, "showDetails": False})
         else:
             return Response({"data": "error"})
+
+
+@api_view(["GET"])
+def totalArtistsImages(request):
+    artists = CustomUser.objects.filter(user_type="Artist").all()
+    artist_ser = CustomUserSerializer(artists, many=True)
+    images_list = []
+    print(artist_ser)
+    for artist in artist_ser.data:
+        print(artist)
+        if len(artist["artist_picture_list"]) > 0:
+            images_list.append(artist)
+        else:
+            continue
+    return Response({"images": images_list})
 
 
 @api_view(["GET"])

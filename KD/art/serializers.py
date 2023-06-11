@@ -7,7 +7,16 @@ from .models import Picture, CustomUser, MatchRelationship
 class PictureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Picture
-        fields = ["id", "image", "user_pk", "size", "artist_id", "match", "price"]
+        fields = [
+            "id",
+            "image",
+            "user_pk",
+            "size",
+            "artist_id",
+            "match",
+            "price",
+            "artist_username",
+        ]
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -23,6 +32,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
             "last_name",
             "username",
             "profile_image",
+            "artist_picture_list",
+            "location",
         ]
 
 
