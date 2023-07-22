@@ -202,21 +202,25 @@ def imagePerArtist(request, artist_id, username):
     print(artist_id)
     if artist_id != "null":
         artist = CustomUser.objects.filter(id=artist_id).first()
-        artist_username = artist.username
     else:
-        artist_username = username
-    if artist_username:
-        artistMatches = MatchRelationship.objects.filter(artist=artist_username).all()
-        artistMatchesSer = MatchRelationshipSerializer(artistMatches, many=True)
-        if artistMatchesSer:
-            for match in artistMatchesSer.data:
-                picture_pk = match["picture_pk"]
+        artist = CustomUser.objects.filter(username=username).first()
+    if artist:
+        images = CustomUserSerializer(artist, many=False)
+        if images:
+            print(images.data["artist_picture_list"])
+            # artistMatches = MatchRelationship.objects.filter(artist=artist_username).all()
+            # artistMatchesSer = MatchRelationshipSerializer(artistMatches, many=True)
+            # if artistMatchesSer:
+            #     for match in artistMatchesSer.data:
+            #         picture_pk = match["picture_pk"]
 
-                image = Picture.objects.filter(id=picture_pk).first()
-                image_ser = PictureSerializer(image, many=False)
-                picture_list.append(image_ser.data)
+            #         image = Picture.objects.filter(id=picture_pk).first()
+            #         image_ser = PictureSerializer(image, many=False)
+            #         picture_list.append(image_ser.data)
 
-            return Response({"images": picture_list, "showDetails": False})
+            return Response(
+                {"images": images.data["artist_picture_list"], "showDetails": False}
+            )
         else:
             return Response({"data": "error"})
 
